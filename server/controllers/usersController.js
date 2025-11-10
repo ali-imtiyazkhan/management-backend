@@ -5,7 +5,7 @@ require('dotenv').config();
 
 
 function createJwt(payload) {
-   
+
     const secret = process.env.JWT_SECRET || 'mysecretkey';
     return jwt.sign(payload, secret, { expiresIn: '7d' });
 }
@@ -59,7 +59,7 @@ exports.login = async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-       
+
         const token = createJwt({ id: user.id, email: user.email });
 
         res.json({
