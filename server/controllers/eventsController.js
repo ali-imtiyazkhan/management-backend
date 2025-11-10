@@ -12,13 +12,11 @@ exports.createEvent = async (req, res) => {
             return res.status(400).json({ error: 'Capacity must be between 1 and 1000.' });
         }
         const event = await prisma.event.create({ data: { title, date_time: new Date(date_time), location, capacity } });
-        res.status(201).json({ id: event.id , event });
+        res.status(201).json({ id: event.id, event });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
-
-
 
 exports.getEventDetails = async (req, res) => {
     try {
@@ -33,7 +31,6 @@ exports.getEventDetails = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
 
 exports.registerEvent = async (req, res) => {
     try {
@@ -69,7 +66,6 @@ exports.registerEvent = async (req, res) => {
 };
 
 
-
 exports.cancelRegistration = async (req, res) => {
     try {
         const { id } = req.params;
@@ -88,7 +84,6 @@ exports.cancelRegistration = async (req, res) => {
 };
 
 
-
 exports.listUpcomingEvents = async (req, res) => {
     try {
         const now = new Date();
@@ -104,8 +99,6 @@ exports.listUpcomingEvents = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
-
 
 exports.getEventStats = async (req, res) => {
     try {

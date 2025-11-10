@@ -17,7 +17,7 @@ model User {
 model Event {
     id            Int            @id @default(autoincrement())
     title         String
-    date_time     DateTime
+    date_time     String
     location      String
     capacity      Int
     registrations Registration[]
