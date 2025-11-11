@@ -1,182 +1,209 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts"
-import { Calendar, Users, TrendingUp, BookOpen } from "lucide-react"
+import axios from "axios"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { EventCard } from "./event-card"
-import { BookingCard } from "./booking-card"
-import { StatCard } from "./stat-card"
+import { Calendar, TrendingUp, Users, BookOpen, LogOut, Plus, Ticket, ArrowRight } from "lucide-react"
 
-const mockEventData = [
-  { month: "Jan", events: 12, bookings: 45 },
-  { month: "Feb", events: 19, bookings: 52 },
-  { month: "Mar", events: 15, bookings: 48 },
-  { month: "Apr", events: 22, bookings: 61 },
-  { month: "May", events: 18, bookings: 55 },
-  { month: "Jun", events: 25, bookings: 68 },
-]
+interface Event {
+  id: number
+  title: string
+  date_time: string
+  location: string
+  capacity: number
+}
 
-const mockUpcomingEvents = [
-  {
-    id: 1,
-    title: "Tech Conference 2025",
-    date: "2025-12-15",
-    time: "09:00 AM",
-    location: "San Francisco, CA",
-    attendees: 245,
-    status: "confirmed",
-  },
-  {
-    id: 2,
-    title: "Product Launch Event",
-    date: "2025-12-18",
-    time: "02:00 PM",
-    location: "New York, NY",
-    attendees: 189,
-    status: "confirmed",
-  },
-  {
-    id: 3,
-    title: "Networking Mixer",
-    date: "2025-12-22",
-    time: "06:00 PM",
-    location: "Los Angeles, CA",
-    attendees: 156,
-    status: "pending",
-  },
-] as const
+export default function DashboardHome() {
+  const router = useRouter()
+  const [stats, setStats] = useState({
+    totalEvents: 0,
+    totalBookings: 0,
+    upcoming: 0,
+  })
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([])
+  const [mounted, setMounted] = useState(false)
+  const [message, setMessage] = useState("")
 
-const mockRecentBookings = [
-  { id: 1, name: "Sarah Johnson", event: "Tech Conference 2025", date: "2 hours ago", tickets: 2 },
-  { id: 2, name: "Michael Chen", event: "Product Launch Event", date: "4 hours ago", tickets: 1 },
-  { id: 3, name: "Emma Williams", event: "Networking Mixer", date: "6 hours ago", tickets: 3 },
-]
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-export function Dashboard() {
-  const router = useRouter();
+  useEffect(() => {
+    if (!mounted) return
 
-  function handleCreateEvents() {
-    router.push("/BookEvents")
+    const fetchDashboardData = async () => {
+      try {
+        const token = localStorage.getItem("authToken")
+        if (!token) {
+          router.push("/SignIn")
+          return
+        }
+
+        const res = await axios.get("http://localhost:3000/events/upcoming", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        setUpcomingEvents(res.data)
+        setStats({
+          totalEvents: res.data.length,
+          totalBookings: Math.floor(Math.random() * 1000),
+          upcoming: res.data.length,
+        })
+      } catch (err) {
+        console.error(err)
+        setMessage(" Failed to load dashboard data.")
+      }
+    }
+
+    fetchDashboardData()
+  }, [mounted])
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken")
+    router.push("/SignIn")
   }
 
+  if (!mounted) return null
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-slate-700 bg-slate-950/50 backdrop-blur-sm">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Events Dashboard</h1>
-              <p className="mt-1 text-slate-400">Manage and track your events and bookings</p>
-            </div>
-            <Button onClick={handleCreateEvents} className="bg-blue-600 hover:bg-blue-700">
-              Create Event
-            </Button>
+    <div className="min-h-screen bg-background text-foreground mx-auto max-w-5xl">
+      <header className="border-b border-border/40 bg-card backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-black">
+              Events Dashboard
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">Manage and track your events</p>
           </div>
+          <Button
+            onClick={handleLogout}
+            className="bg-destructive hover:bg-destructive/90 gap-2 rounded-lg text-black cursor-pointer"
+          >
+            <LogOut className="h-4 w-4 text-black" />
+            Logout
+          </Button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        <div className="mb-12">
+          <h2 className="text-lg font-semibold text-foreground mb-6">Overview</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Total Events Card */}
+            <Card className="p-6 bg-card border-border/40 hover:border-accent/50 transition-all duration-300 group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 bg-accent/10 rounded-lg group-hover:bg-accent/20 transition-colors">
+                  <BookOpen className="h-6 w-6 text-black" />
+                </div>
+              </div>
+              <h3 className="text-sm font-medium text-muted-foreground">Total Events</h3>
+              <p className="mt-3 text-3xl font-bold text-foreground">{stats.totalEvents}</p>
+            </Card>
 
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Events" value="128" icon={BookOpen} trend="+12%" color="blue" />
-          <StatCard title="Total Bookings" value="1,245" icon={Users} trend="+8%" color="cyan" />
-          <StatCard title="Upcoming Events" value="12" icon={Calendar} trend="+3" color="emerald" />
-          <StatCard title="Revenue" value="$48,500" icon={TrendingUp} trend="+24%" color="violet" />
-        </div>
+            {/* Total Bookings Card */}
+            <Card className="p-6 bg-card border-border/40 hover:border-primary/50 transition-all duration-300 group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+              <h3 className="text-sm font-medium text-muted-foreground">Total Bookings</h3>
+              <p className="mt-3 text-3xl font-bold text-foreground">{stats.totalBookings}</p>
+            </Card>
 
-        
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-         
-          <Card className="border-slate-700 bg-slate-800/50 p-6">
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
-              <TrendingUp className="h-5 w-5 text-cyan-400" />
-              Events & Bookings Trend
-            </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={mockEventData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="month" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #475569" }}
-                  cursor={{ stroke: "#60a5fa" }}
-                />
-                <Legend />
-                <Line type="monotone" dataKey="events" stroke="#06b6d4" strokeWidth={2} dot={{ fill: "#06b6d4" }} />
-                <Line type="monotone" dataKey="bookings" stroke="#8b5cf6" strokeWidth={2} dot={{ fill: "#8b5cf6" }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </Card>
+            {/* Upcoming Events Card */}
+            <Card className="p-6 bg-card border-border/40 hover:border-accent/50 transition-all duration-300 group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 bg-accent/10 rounded-lg group-hover:bg-accent/20 transition-colors">
+                  <Calendar className="h-6 w-6 text-black" />
+                </div>
+              </div>
+              <h3 className="text-sm font-medium text-muted-foreground">Upcoming Events</h3>
+              <p className="mt-3 text-3xl font-bold text-foreground">{stats.upcoming}</p>
+            </Card>
 
-        
-          <Card className="border-slate-700 bg-slate-800/50 p-6">
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
-              <BarChart className="h-5 w-5 text-violet-400" />
-              Event Status Distribution
-            </h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart
-                data={[
-                  { status: "Confirmed", value: 85 },
-                  { status: "Pending", value: 28 },
-                  { status: "Completed", value: 15 },
-                ]}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="status" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #475569" }}
-                  cursor={{ fill: "#1e293b" }}
-                />
-                <Bar dataKey="value" fill="#06b6d4" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        </div>
-
-      
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      
-          <div className="lg:col-span-2">
-            <div className="mb-4 flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-cyan-400" />
-              <h3 className="text-lg font-semibold text-white">Upcoming Events</h3>
-            </div>
-            <div className="space-y-4">
-              {mockUpcomingEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          </div>
-
-       
-          <div>
-            <div className="mb-4 flex items-center gap-2">
-              <Users className="h-5 w-5 text-emerald-400" />
-              <h3 className="text-lg font-semibold text-white">Recent Bookings</h3>
-            </div>
-            <div className="space-y-3">
-              {mockRecentBookings.map((booking) => (
-                <BookingCard key={booking.id} booking={booking} />
-              ))}
-            </div>
+            {/* Revenue Card */}
+            <Card className="p-6 bg-card border-border/40 hover:border-primary/50 transition-all duration-300 group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <TrendingUp className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+              <h3 className="text-sm font-medium text-muted-foreground">Revenue</h3>
+              <p className="mt-3 text-3xl font-bold text-foreground">$48,500</p>
+            </Card>
           </div>
         </div>
+
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-foreground">Quick Actions</h2>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button
+              onClick={() => router.push("/AddEvents")}
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground gap-2 py-6 text-base font-semibold rounded-lg transition-all duration-300 cursor-pointer"
+            >
+              Create Event
+            </Button>
+            <Button
+              onClick={() => router.push("/BookEvents")}
+              className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground gap-2 py-6 text-base font-semibold rounded-lg transition-all duration-300 cursor-pointer"
+            >
+              Book Event
+            </Button>
+          </div>
+        </div>
+
+        <section>
+          <h2 className="text-lg font-semibold mb-6 text-foreground">Upcoming Events</h2>
+          {upcomingEvents.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.map((event) => (
+                <Card
+                  key={event.id}
+                  className="p-6 bg-card border-border/40 hover:border-accent/60 hover:shadow-lg hover:shadow-accent/10 hover:text-black transition-all duration-300 group cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-foreground transition-colors">
+                        {event.title}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4 text-accent/60" />
+                      <span>{new Date(event.date_time).toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Users className="h-4 w-4 text-primary/60" />
+                      <span>{event.location}</span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => router.push(`/BookEvents/${event.id}`)}
+                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground gap-2 group/btn transition-all duration-300 cursor-pointer"
+                  >
+                    View Details
+                    <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Calendar className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">No upcoming events found.</p>
+              <p className="text-muted-foreground/60 text-sm mt-1">Create one to get started</p>
+            </div>
+          )}
+        </section>
+
+        {message && <p className="text-center text-destructive mt-8 text-sm font-medium">{message}</p>}
       </main>
     </div>
   )

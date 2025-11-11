@@ -27,10 +27,10 @@ const SignInPage = () => {
                     setMessage("Login successful! Redirecting...")
                     window.location.href = "/Dashboard"
                 } else {
-                    setMessage("⚠️ Login response missing token.")
+                    setMessage("Login response missing token.")
                 }
             } else {
-                setMessage("⚠️ Invalid credentials, please try again.")
+                setMessage("Invalid credentials, please try again.")
             }
         } catch (error: any) {
             console.error("Login error:", error)

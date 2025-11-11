@@ -11,11 +11,8 @@ const {
 const authMiddleware = require('../middleawre/authMiddleware');
 
 
-
-// ✅ Public routes (no token required)
 router.get('/upcoming', listUpcomingEvents);
 
-// ✅ Protected routes (token required)
 router.post('/', authMiddleware, createEvent);
 router.get('/:id/stats', authMiddleware, getEventStats);
 router.get('/:id', authMiddleware, getEventDetails);

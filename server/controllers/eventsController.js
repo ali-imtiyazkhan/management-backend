@@ -50,7 +50,7 @@ exports.getEventDetails = async (req, res) => {
 exports.registerEvent = async (req, res) => {
     try {
         const { id } = req.params;
-        const { userId } = req.body;
+        const userId = req.user.id;
 
         const event = await prisma.event.findUnique({
             where: { id: parseInt(id) },
