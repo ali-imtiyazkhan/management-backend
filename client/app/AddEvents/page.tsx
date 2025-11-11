@@ -57,7 +57,7 @@ export default function CreateEventForm() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-slate-100 to-slate-200 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-white px-4">
             <div className="w-full max-w-lg bg-white rounded-2xl p-8 shadow-2xl border border-slate-300">
                 <h2 className="text-2xl font-bold mb-6 text-center text-slate-800">
                     Create New Event
@@ -124,7 +124,7 @@ export default function CreateEventForm() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-lg py-2.5 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                        className="w-full bg-black hover:bg-neutral-800 text-white font-semibold cursor-pointer rounded-lg py-2.5 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
                     >
                         {loading ? "Creating..." : "Create Event"}
                     </button>
