@@ -45,6 +45,7 @@ export default function CreateEventForm() {
                 setDateTime("")
                 setLocation("")
                 setCapacity("")
+                window.location.href = "/BookEvents"
             } else {
                 setMessage(" Something went wrong while creating the event.")
             }
