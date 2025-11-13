@@ -21,7 +21,7 @@ export default function BookEventsPage() {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const res = await axios.get("http://localhost:3000/events/upcoming")
+                const res = await axios.get("https://management-backend-1-efov.onrender.com/events/upcoming")
                 setEvents(res.data)
             } catch (error) {
                 console.error("Error fetching events:", error)

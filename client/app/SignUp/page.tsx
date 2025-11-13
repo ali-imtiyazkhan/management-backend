@@ -14,7 +14,7 @@ const SignupPage = () => {
     setMessage("")
 
     try {
-      const res = await axios.post("http://localhost:3000/users/", {
+      const res = await axios.post("https://management-backend-1-efov.onrender.com/users/", {
         name,
         email,
       })

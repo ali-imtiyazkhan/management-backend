@@ -42,7 +42,7 @@ export default function CreateEventForm() {
                 formData.append("image", imageFile)
 
                 const uploadRes = await axios.post(
-                    "http://localhost:3000/api/upload",
+                    "https://management-backend-1-efov.onrender.com/api/upload",
                     formData,
                     { headers: { "Content-Type": "multipart/form-data" } }
                 )
@@ -52,7 +52,7 @@ export default function CreateEventForm() {
 
             // --------- STEP 2: CREATE EVENT ---------
             const res = await axios.post(
-                "http://localhost:3000/events",
+                "https://management-backend-1-efov.onrender.com/events",
                 {
                     title,
                     date_time,

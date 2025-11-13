@@ -41,7 +41,7 @@ export default function DashboardHome() {
           return
         }
 
-        const res = await axios.get("http://localhost:3000/events/upcoming", {
+        const res = await axios.get("https://management-backend-1-efov.onrender.com/events/upcoming", {
           headers: { Authorization: `Bearer ${token}` },
         })
 

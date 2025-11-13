@@ -10,7 +10,7 @@ interface Event {
   date_time: string
   location: string
   capacity: number
-  imageUrl?: string   // <-- added
+  imageUrl?: string
 }
 
 export default function EventBookingPage() {
@@ -32,7 +32,7 @@ export default function EventBookingPage() {
     const fetchEvent = async () => {
       try {
         const token = localStorage.getItem("authToken")
-        const res = await axios.get(`http://localhost:3000/events/${id}`, {
+        const res = await axios.get(`https://management-backend-1-efov.onrender.com/events/${id}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         })
         setEvent(res.data)
@@ -57,7 +57,7 @@ export default function EventBookingPage() {
       }
 
       const res = await axios.post(
-        `http://localhost:3000/events/${id}/register`,
+        `https://management-backend-1-efov.onrender.com/events/${id}/register`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -85,7 +85,7 @@ export default function EventBookingPage() {
         </button>
 
         {event ? (
-          
+
           <>
             {/* EVENT IMAGE */}
             <img
