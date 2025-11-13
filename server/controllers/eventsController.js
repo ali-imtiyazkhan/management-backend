@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 exports.createEvent = async (req, res) => {
     try {
-        const { title, date_time, location, capacity } = req.body;
+        const { title, date_time, location, capacity, imageUrl } = req.body;
 
         if (!title || !date_time || !location || !capacity) {
             return res.status(400).json({ error: 'All fields are required.' });
@@ -14,21 +14,23 @@ exports.createEvent = async (req, res) => {
             return res.status(400).json({ error: 'Capacity must be between 1 and 1000.' });
         }
 
-
         const event = await prisma.event.create({
             data: {
                 title,
                 date_time: String(date_time),
                 location,
                 capacity: Number(capacity),
+                imageUrl: imageUrl || null,
             },
         });
 
         res.status(201).json({ id: event.id, event });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 };
+
 
 exports.getEventDetails = async (req, res) => {
     try {

@@ -7,8 +7,19 @@ export default function CreateEventForm() {
     const [date_time, setDateTime] = useState("")
     const [location, setLocation] = useState("")
     const [capacity, setCapacity] = useState("")
+    const [imageFile, setImageFile] = useState<File | null>(null)
+    const [imagePreview, setImagePreview] = useState("")
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState("")
+
+    // --------- HANDLE FILE SELECT ---------
+    const handleFileChange = (e: any) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0]
+            setImageFile(file)
+            setImagePreview(URL.createObjectURL(file))
+        }
+    }
 
     const handleCreateEvent = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -18,11 +29,28 @@ export default function CreateEventForm() {
         try {
             const token = localStorage.getItem("authToken")
             if (!token) {
-                setMessage(" You must be logged in to create an event.")
+                setMessage("You must be logged in to create an event.")
                 setLoading(false)
                 return
             }
 
+            let uploadedImageUrl = ""
+
+            // --------- STEP 1: UPLOAD IMAGE TO CLOUDINARY ---------
+            if (imageFile) {
+                const formData = new FormData()
+                formData.append("image", imageFile)
+
+                const uploadRes = await axios.post(
+                    "http://localhost:3000/api/upload",
+                    formData,
+                    { headers: { "Content-Type": "multipart/form-data" } }
+                )
+
+                uploadedImageUrl = uploadRes.data.url
+            }
+
+            // --------- STEP 2: CREATE EVENT ---------
             const res = await axios.post(
                 "http://localhost:3000/events",
                 {
@@ -30,6 +58,7 @@ export default function CreateEventForm() {
                     date_time,
                     location,
                     capacity: Number(capacity),
+                    imageUrl: uploadedImageUrl, // 👈 IMPORTANT
                 },
                 {
                     headers: {
@@ -40,18 +69,20 @@ export default function CreateEventForm() {
             )
 
             if (res.status === 201) {
-                setMessage(" Event created successfully!")
+                setMessage("Event created successfully!")
                 setTitle("")
                 setDateTime("")
                 setLocation("")
                 setCapacity("")
+                setImagePreview("")
+                setImageFile(null)
                 window.location.href = "/BookEvents"
             } else {
-                setMessage(" Something went wrong while creating the event.")
+                setMessage("Something went wrong while creating the event.")
             }
         } catch (error: any) {
             console.error(error)
-            setMessage(` ${error.response?.data?.error || "Server error occurred."}`)
+            setMessage(error.response?.data?.error || "Server error occurred.")
         } finally {
             setLoading(false)
         }
@@ -65,6 +96,26 @@ export default function CreateEventForm() {
                 </h2>
 
                 <form onSubmit={handleCreateEvent} className="space-y-5">
+
+                    {/* IMAGE UPLOAD */}
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-600 mb-2">
+                            Event Image
+                        </label>
+
+                        <input type="file" accept="image/*"
+                            onChange={handleFileChange}
+                            className="block w-full text-sm text-slate-600" />
+
+                        {imagePreview && (
+                            <img
+                                src={imagePreview}
+                                className="mt-3 w-full h-48 object-cover rounded-lg shadow"
+                                alt="Preview"
+                            />
+                        )}
+                    </div>
+
                     <div>
                         <label className="block text-sm font-semibold text-slate-600 mb-2">
                             Title
@@ -73,7 +124,7 @@ export default function CreateEventForm() {
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="w-full border border-slate-300 rounded-lg px-4 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                            className="w-full border border-slate-300 rounded-lg px-4 py-2"
                             placeholder="Enter event title"
                             required
                         />
@@ -87,7 +138,7 @@ export default function CreateEventForm() {
                             type="datetime-local"
                             value={date_time}
                             onChange={(e) => setDateTime(e.target.value)}
-                            className="w-full border border-slate-300 rounded-lg px-4 py-2 text-slate-800 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                            className="w-full border border-slate-300 rounded-lg px-4 py-2"
                             required
                         />
                     </div>
@@ -100,7 +151,7 @@ export default function CreateEventForm() {
                             type="text"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
-                            className="w-full border border-slate-300 rounded-lg px-4 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                            className="w-full border border-slate-300 rounded-lg px-4 py-2"
                             placeholder="Event location"
                             required
                         />
@@ -116,7 +167,7 @@ export default function CreateEventForm() {
                             max="1000"
                             value={capacity}
                             onChange={(e) => setCapacity(e.target.value)}
-                            className="w-full border border-slate-300 rounded-lg px-4 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                            className="w-full border border-slate-300 rounded-lg px-4 py-2"
                             placeholder="Enter capacity (1–1000)"
                             required
                         />
@@ -125,7 +176,7 @@ export default function CreateEventForm() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-black hover:bg-neutral-800 text-white font-semibold cursor-pointer rounded-lg py-2.5 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                        className="w-full bg-black text-white rounded-lg py-2.5 shadow-md hover:bg-neutral-800 disabled:opacity-50"
                     >
                         {loading ? "Creating..." : "Create Event"}
                     </button>

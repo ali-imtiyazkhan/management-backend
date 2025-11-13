@@ -20,6 +20,7 @@ model Event {
     date_time     String
     location      String
     capacity      Int
+    imageUrl      String?       
     registrations Registration[]
 }
 

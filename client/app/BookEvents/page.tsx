@@ -10,6 +10,7 @@ interface Event {
     date_time: string
     location: string
     capacity: number
+    imageUrl?: string   // <-- Added
 }
 
 export default function BookEventsPage() {
@@ -30,9 +31,9 @@ export default function BookEventsPage() {
     }, [])
 
     return (
-        <div className="min-h-screen bg-white text-black py-10 px-4 ">
+        <div className="min-h-screen bg-white text-black py-10 px-4">
             <div className="max-w-5xl mx-auto">
-                <h1 className="text-3xl font-bold text-center mb-8"> Available Events</h1>
+                <h1 className="text-3xl font-bold text-center mb-8">Available Events</h1>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {events.length > 0 ? (
@@ -41,6 +42,16 @@ export default function BookEventsPage() {
                                 key={event.id}
                                 className="bg-zinc-100 rounded-xl shadow-md border border-zinc-200 p-5 hover:bg-zinc-200 transition"
                             >
+                                {/* IMAGE */}
+                                <img
+                                    src={
+                                        event.imageUrl ||
+                                        "https://via.placeholder.com/400x250?text=No+Image"
+                                    }
+                                    alt={event.title}
+                                    className="w-full h-40 object-cover rounded-lg mb-4"
+                                />
+
                                 <h3 className="text-xl font-semibold mb-2 text-black">
                                     {event.title}
                                 </h3>
